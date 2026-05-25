@@ -106,9 +106,9 @@ export default function RegisterPage() {
           <div className="px-8 pt-8 pb-6">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">JF</span>
+                <span className="text-white font-bold text-sm">A</span>
               </div>
-              <span className="text-lg font-bold text-gray-900">JobFlow</span>
+              <span className="text-lg font-bold text-gray-900">Applytic</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mt-6">Create your account</h1>
             <p className="text-gray-600 text-sm mt-2">

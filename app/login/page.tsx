@@ -83,9 +83,9 @@ export default function LoginPage() {
           <div className="px-8 pt-8 pb-6">
             <div className="flex items-center gap-2 mb-2">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">JF</span>
+                <span className="text-white font-bold text-sm">A</span>
               </div>
-              <span className="text-lg font-bold text-gray-900">JobFlow</span>
+              <span className="text-lg font-bold text-gray-900">Applytic</span>
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mt-6">Welcome back</h1>
             <p className="text-gray-600 text-sm mt-2">
@@ -226,7 +226,7 @@ export default function LoginPage() {
                 <div className="w-full border-t border-gray-300"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">New to JobFlow?</span>
+                <span className="px-2 bg-white text-gray-500">New to Applytic?</span>
               </div>
             </div>
 

@@ -1,6 +1,6 @@
-# 🚀 JobFlow
+# 🚀 Applytic
 
-JobFlow é uma aplicação web para gestão de candidaturas de emprego.
+Applytic é uma aplicação web para gestão de candidaturas de emprego.
 
 Permite aos utilizadores registar, acompanhar e organizar as suas candidaturas num único dashboard.
 

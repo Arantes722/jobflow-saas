@@ -24,7 +24,7 @@ export function DashboardHeader({ applications, userName = "User" }: DashboardHe
 
   return (
     <div className="mb-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-2">JobFlow</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-2">Applytic</h1>
       <p className="text-gray-600 mb-6">Bem-vindo, {userName}</p>
 
       <div className="grid grid-cols-5 gap-4">
