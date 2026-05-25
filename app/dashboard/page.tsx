@@ -1,7 +1,11 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import { supabase } from "@/lib/supabase"
+import { ApplicationForm } from "@/app/components/ApplicationForm"
+import { ApplicationList } from "@/app/components/ApplicationList"
+import { FilterBar } from "@/app/components/FilterBar"
+import { DashboardHeader } from "@/app/components/DashboardHeader"
 
 type Application = {
   id: string
@@ -14,10 +18,14 @@ type Application = {
 export default function Dashboard() {
   const [user, setUser] = useState<any>(null)
   const [applications, setApplications] = useState<Application[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
-  const [company, setCompany] = useState("")
-  const [role, setRole] = useState("")
-  const [jobUrl, setJobUrl] = useState("")
+  // Filter state
+  const [filters, setFilters] = useState({ status: "", company: "" })
+
+  const handleFilterChange = (newFilters: { status?: string; company?: string }) => {
+    setFilters((prev) => ({ ...prev, ...newFilters }))
+  }
 
   useEffect(() => {
     const loadUser = async () => {
@@ -32,6 +40,7 @@ export default function Dashboard() {
     if (!user) return
 
     const loadApps = async () => {
+      setIsLoading(true)
       const { data } = await supabase
         .from("applications")
         .select("*")
@@ -39,22 +48,38 @@ export default function Dashboard() {
         .order("created_at", { ascending: false })
 
       setApplications(data || [])
+      setIsLoading(false)
     }
 
     loadApps()
   }, [user])
 
-  async function addApplication() {
+  // Filter applications based on status and company
+  const filteredApplications = useMemo(() => {
+    return applications.filter((app) => {
+      const matchesStatus = !filters.status || app.status === filters.status
+      const matchesCompany =
+        !filters.company || app.company.toLowerCase().includes(filters.company.toLowerCase())
+      return matchesStatus && matchesCompany
+    })
+  }, [applications, filters])
+
+  async function handleAddApplication(data: {
+    company: string
+    role: string
+    jobUrl: string
+    status: string
+  }) {
     if (!user) return
 
-    const { data, error } = await supabase
+    const { data: newApp, error } = await supabase
       .from("applications")
       .insert({
         user_id: user.id,
-        company,
-        role,
-        job_url: jobUrl,
-        status: "applied",
+        company: data.company,
+        role: data.role,
+        job_url: data.jobUrl,
+        status: data.status,
       })
       .select()
 
@@ -63,63 +88,88 @@ export default function Dashboard() {
       return
     }
 
-    if (data) {
-      setApplications([data[0], ...applications])
+    if (newApp) {
+      setApplications([newApp[0], ...applications])
     }
-
-    setCompany("")
-    setRole("")
-    setJobUrl("")
   }
 
+  async function handleEditApplication(
+    app: Application,
+    data: {
+      company: string
+      role: string
+      jobUrl: string
+      status: string
+    }
+  ) {
+    const { error } = await supabase
+      .from("applications")
+      .update({
+        company: data.company,
+        role: data.role,
+        job_url: data.jobUrl,
+        status: data.status,
+      })
+      .eq("id", app.id)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    setApplications(
+      applications.map((a) =>
+        a.id === app.id
+          ? {
+              ...a,
+              company: data.company,
+              role: data.role,
+              job_url: data.jobUrl,
+              status: data.status,
+            }
+          : a
+      )
+    )
+  }
+
+  async function handleDeleteApplication(id: string) {
+    const { error } = await supabase
+      .from("applications")
+      .delete()
+      .eq("id", id)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+
+    setApplications(applications.filter((app) => app.id !== id))
+  }
+
+  const userName = user?.email?.split("@")[0] || "User"
+
   return (
-    <main className="p-10 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">
-        Dashboard
-      </h1>
+    <main className="min-h-screen bg-gray-50">
+      <div className="max-w-6xl mx-auto px-6 py-8">
+        {/* Header with stats */}
+        <DashboardHeader applications={applications} userName={userName} />
 
-      {/* FORM */}
-      <div className="flex flex-col gap-2 mb-10">
-        <input
-          className="border p-2"
-          placeholder="Empresa"
-          value={company}
-          onChange={(e) => setCompany(e.target.value)}
+        {/* Create form */}
+        <ApplicationForm onSubmit={handleAddApplication} />
+
+        {/* Filters */}
+        <FilterBar
+          onFilterChange={handleFilterChange}
+          statusOptions={["applied", "interview", "rejected", "offer"]}
         />
 
-        <input
-          className="border p-2"
-          placeholder="Cargo"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
+        {/* Applications list */}
+        <ApplicationList
+          applications={filteredApplications}
+          onEdit={handleEditApplication}
+          onDelete={handleDeleteApplication}
+          isLoading={isLoading}
         />
-
-        <input
-          className="border p-2"
-          placeholder="Link da vaga"
-          value={jobUrl}
-          onChange={(e) => setJobUrl(e.target.value)}
-        />
-
-        <button
-          className="bg-black text-white p-2"
-          onClick={addApplication}
-        >
-          Adicionar candidatura
-        </button>
-      </div>
-
-      {/* LIST */}
-      <div className="space-y-3">
-        {applications.map((app) => (
-          <div key={app.id} className="border p-3">
-            <h3 className="font-bold">{app.company}</h3>
-            <p>{app.role}</p>
-            <p className="text-sm text-gray-500">
-              {app.status}
-            </p>
-          </div>
-        ))}
       </div>
     </main>
   )
